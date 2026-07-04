@@ -1,0 +1,632 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arlette — UI/UX Designer</title>
+
+<!-- Google Fonts: Fraunces for headings, Inter for body text -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+  /* =========================================
+     1. COLORS & BASE SETTINGS
+     Using CSS variables so colors are easy
+     to change in one place.
+  ========================================= */
+  :root{
+    --bg: #F3F1F8;       /* page background */
+    --surface: #FFFFFF;  /* card background */
+    --ink: #16131F;      /* main text color */
+    --muted: #6A6478;    /* secondary text color */
+    --line: #DCD8EA;     /* border color */
+    --accent: #6C4CF1;   /* purple accent */
+    --coral: #FF6B5B;    /* orange/coral accent */
+    --mustard: #F4B942;  /* yellow accent */
+    --radius: 16px;      /* rounded corners */
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: none; }
+
+  h1, h2, h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .container{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  section{
+    padding: 80px 0;
+  }
+
+  /* Elements start hidden + shifted down, then fade/slide in
+     when the "in-view" class is added by our JS below. */
+  .reveal{
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.in-view{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+
+  /* =========================================
+     2. NAVBAR
+  ========================================= */
+  header{
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    z-index: 10;
+  }
+
+  nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo{
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .nav-links{
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .nav-links a{
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .nav-links a:hover{
+    color: var(--ink);
+  }
+
+  /* Hamburger button - hidden on desktop, shown on mobile */
+  .nav-toggle{
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .nav-toggle span{
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+  }
+
+
+  /* =========================================
+     3. HERO SECTION
+  ========================================= */
+  .badge{
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .hero h1{
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    max-width: 700px;
+  }
+
+  .hero h1 .accent{ color: var(--accent); }
+
+  .hero p{
+    max-width: 520px;
+    color: var(--muted);
+    margin-top: 20px;
+    font-size: 16px;
+  }
+
+  .hero-buttons{
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .btn{
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .btn-primary{
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .btn-ghost{
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+
+  /* =========================================
+     4. SECTION HEADINGS (reused everywhere)
+  ========================================= */
+  .section-label{
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .section-title{
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin-bottom: 36px;
+  }
+
+
+  /* =========================================
+     5. ABOUT SECTION
+  ========================================= */
+  .about-grid{
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+  }
+
+  .about-grid p{
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .facts{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .facts .fact{
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .facts .fact:last-child{
+    border-bottom: none;
+  }
+
+  .facts .fact-label{
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .facts .fact-value{
+    font-weight: 600;
+  }
+
+
+  /* =========================================
+     6. SKILLS SECTION
+  ========================================= */
+  .skills-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .skill-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .skill-card h3{
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+
+  .tag-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+
+  /* =========================================
+     7. JOURNEY / TIMELINE SECTION
+  ========================================= */
+  .timeline-item{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .timeline-date{
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .timeline-item h3{
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .timeline-org{
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .timeline-item p{
+    color: var(--muted);
+  }
+
+
+  /* =========================================
+     8. CONTACT SECTION
+  ========================================= */
+  .contact-box{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 40px;
+  }
+
+  .contact-info p{
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .contact-line{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  form{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  form label{
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  form input, form textarea{
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    padding: 8px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+  }
+
+  form input:focus, form textarea:focus{
+    outline: none;
+    border-bottom-color: var(--accent);
+  }
+
+  .submit-btn{
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+
+  /* =========================================
+     9. FOOTER
+  ========================================= */
+  footer{
+    text-align: center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  footer .footer-socials{
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+
+  /* =========================================
+     10. MOBILE / RESPONSIVE
+  ========================================= */
+  @media (max-width: 800px){
+    .about-grid,
+    .skills-grid,
+    .contact-box{
+      grid-template-columns: 1fr;
+    }
+
+    .nav-toggle{
+      display: flex;
+    }
+
+    .nav-links{
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .nav-links.open{
+      display: flex;
+    }
+
+    .nav-links a{
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- ============ NAVBAR ============ -->
+  <header>
+    <nav class="container">
+      <div class="logo">AR.</div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#journey">Journey</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section id="home">
+    <div class="container">
+      <span class="badge">Open to design opportunities</span>
+      <h1>Design with <span class="accent">clarity.</span><br>Build it, too.</h1>
+      <p>Hey — my honour to be at your service. I'm Arlette, a UI/UX design learner in SOD, shaping interfaces that make sense before they make an impression.</p>
+      <div class="hero-buttons">
+        <a href="#skills" class="btn btn-primary">See my skills</a>
+        <a href="#contact" class="btn btn-ghost">Say hello</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about">
+    <div class="container">
+      <div class="section-label">01</div>
+      <h2 class="section-title">About Me</h2>
+
+      <div class="about-grid reveal">
+        <div>
+          <p>I'm a Level 3 Software Development learner specialising in UI/UX design. I care about interfaces that make sense before they make an impression — clean flows, honest hierarchy, and details that hold up under real use.</p>
+          <p>Alongside design, I bring frontend skills to the table, so what I design isn't only a mockup — it's something I can help build. I'm just as comfortable managing a project's moving parts as I am refining a component in Figma.</p>
+        </div>
+
+        <div class="facts">
+          <div class="fact">
+            <div class="fact-label">Location</div>
+            <div class="fact-value">Ngoma, Rwanda</div>
+          </div>
+          <div class="fact">
+            <div class="fact-label">Email</div>
+            <div class="fact-value">brownarlette836@gmail.com</div>
+          </div>
+          <div class="fact">
+            <div class="fact-label">Role</div>
+            <div class="fact-value">Designer &amp; Project Management</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SKILLS ============ -->
+  <section id="skills">
+    <div class="container">
+      <div class="section-label">02</div>
+      <h2 class="section-title">Toolkit</h2>
+
+      <div class="skills-grid reveal">
+        <div class="skill-card">
+          <h3>Design</h3>
+          <div class="tag-list">
+            <span class="tag">Figma</span>
+            <span class="tag">UI/UX Design</span>
+            <span class="tag">Wireframing</span>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <h3>Frontend</h3>
+          <div class="tag-list">
+            <span class="tag">Vue.js</span>
+            <span class="tag">Tailwind CSS</span>
+            <span class="tag">Bootstrap</span>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <h3>Tools &amp; Workflow</h3>
+          <div class="tag-list">
+            <span class="tag">Git &amp; GitHub</span>
+            <span class="tag">Project Management</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ JOURNEY ============ -->
+  <section id="journey">
+    <div class="container">
+      <div class="section-label">03</div>
+      <h2 class="section-title">Journey</h2>
+
+      <div class="timeline-item reveal">
+        <div class="timeline-date">2025 — 2026</div>
+        <h3>Level 3 — Software Development</h3>
+        <div class="timeline-org">SOD</div>
+        <p>Deepening full-stack fundamentals while specialising in UI/UX design and product thinking — from wireframe to working interface.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-label">04</div>
+      <h2 class="section-title">Get in Touch</h2>
+
+      <div class="contact-box reveal">
+        <div class="contact-info">
+          <p>Open to design opportunities, collaborations, and a good conversation about interfaces. I reply personally.</p>
+          <div class="contact-line">📧 brownarlette836@gmail.com</div>
+          <div class="contact-line">📍 Ngoma, Rwanda</div>
+        </div>
+
+        <!-- This form doesn't send data anywhere yet.
+             You'd need a backend or a service like Formspree to make it work. -->
+        <form onsubmit="event.preventDefault(); alert('Message sent! (demo only)');">
+          <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" placeholder="Your name" required>
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="you@email.com" required>
+          </div>
+          <div>
+            <label for="message">Message</label>
+            <textarea id="message" rows="4" placeholder="Tell me about your project..." required></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="container">
+      <p>© 2026 Arlette · Built with care.</p>
+      <div class="footer-socials">
+        <a href="https://github.com/" target="_blank">GitHub</a>
+        <a href="https://wa.me/" target="_blank">WhatsApp</a>
+        <a href="https://instagram.com/" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---- 1. Mobile menu toggle ----
+    // When the hamburger button is clicked, show/hide the nav links.
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    navToggle.addEventListener('click', function () {
+      navLinks.classList.toggle('open');
+    });
+
+    // Close the menu automatically after clicking a link (nice on mobile)
+    navLinks.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        navLinks.classList.remove('open');
+      });
+    });
+
+    // ---- 2. Reveal elements as you scroll ----
+    // We watch every element with class="reveal". When it scrolls
+    // into view, we add "in-view" to it, which triggers the CSS
+    // fade/slide transition defined above.
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    revealElements.forEach(function (el) {
+      revealObserver.observe(el);
+    });
+  </script>
+
+</body>
+</html>
